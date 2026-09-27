@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diet Planner - Gerador de Planos de Dieta</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      color: white;
+      margin-bottom: 40px;
+    }
+
+    header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    @media (max-width: 768px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-section {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .form-section h2 {
+      color: #667eea;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    input[type="number"],
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 5px;
+      font-size: 1em;
+      transition: border-color 0.3s;
+    }
+
+    input[type="number"]:focus,
+    input[type="text"]:focus,
+    select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+    }
+
+    input[type="checkbox"] {
+      margin-right: 8px;
+      cursor: pointer;
+    }
+
+    .checkbox-item label {
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    button {
+      flex: 1;
+      padding: 14px;
+      font-size: 1em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .btn-generate {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-generate:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-generate:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-clear {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    .btn-clear:hover {
+      background: #e0e0e0;
+    }
+
+    .results-section {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      display: none;
+    }
+
+    .results-section.show {
+      display: block;
+    }
+
+    .results-section h2 {
+      color: #667eea;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+    }
+
+    .summary {
+      background: #f5f5f5;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #667eea;
+    }
+
+    .summary-item {
+      margin: 10px 0;
+      font-size: 1.1em;
+    }
+
+    .summary-label {
+      font-weight: 600;
+      color: #667eea;
+    }
+
+    .day-plan {
+      margin: 20px 0;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .day-header {
+      font-size: 1.2em;
+      font-weight: 600;
+      color: #667eea;
+      margin-bottom: 15px;
+    }
+
+    .meal {
+      margin: 15px 0;
+      padding: 15px;
+      background: white;
+      border-radius: 5px;
+      border-left: 3px solid #764ba2;
+    }
+
+    .meal-type {
+      font-weight: 600;
+      color: #764ba2;
+      margin-bottom: 10px;
+    }
+
+    .meal-options {
+      margin-left: 15px;
+    }
+
+    .meal-option {
+      padding: 8px;
+      margin: 8px 0;
+      background: #f0f0f0;
+      border-radius: 4px;
+      font-size: 0.95em;
+    }
+
+    .nutrients {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 8px;
+      font-size: 0.85em;
+    }
+
+    .nutrient {
+      background: white;
+      padding: 6px;
+      border-radius: 3px;
+      text-align: center;
+    }
+
+    .nutrient-label {
+      color: #666;
+      font-size: 0.8em;
+    }
+
+    .nutrient-value {
+      font-weight: 600;
+      color: #667eea;
+    }
+
+    .error {
+      background: #fee;
+      color: #c33;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 15px 0;
+      border-left: 4px solid #c33;
+      display: none;
+    }
+
+    .error.show {
+      display: block;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      display: none;
+    }
+
+    .loading.show {
+      display: block;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .info-box {
+      background: #e3f2fd;
+      border-left: 4px solid #2196F3;
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 20px;
+      color: #1565c0;
+      font-size: 0.95em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🍽️ Diet Planner</h1>
+      <p>Gerador de Planos de Dieta Personalizados com IA</p>
+    </header>
+
+    <div class="content">
+      <div class="form-section">
+        <h2>Seus Dados</h2>
+
+        <div class="form-group">
+          <label for="age">Idade (anos)</label>
+          <input type="number" id="age" min="18" max="80" value="30" required>
+        </div>
+
+        <div class="form-group">
+          <label for="weight">Peso (kg)</label>
+          <input type="number" id="weight" min="30" max="200" value="75" step="0.1" required>
+        </div>
+
+        <div class="form-group">
+          <label for="height">Altura (cm)</label>
+          <input type="number" id="height" min="100" max="250" value="175" required>
+        </div>
+
+        <div class="form-group">
+          <label for="activity">Nível de Atividade</label>
+          <select id="activity" required>
+            <option value="sedentário">Sedentário</option>
+            <option value="leve">Leve</option>
+            <option value="moderado" selected>Moderado</option>
+            <option value="intenso">Intenso</option>
+            <option value="muito_intenso">Muito Intenso</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Objetivo Fitness</label>
+          <div class="checkbox-group">
+            <div class="checkbox-item">
+              <input type="checkbox" id="goal-weight-loss" value="perda_peso">
+              <label for="goal-weight-loss">Perda de Peso</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="goal-muscle" value="ganho_muscular">
+              <label for="goal-muscle">Ganho de Massa</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="goal-maintenance" value="manutenção">
+              <label for="goal-maintenance">Manutenção</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="goal-health" value="saúde">
+              <label for="goal-health">Saúde</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Restrições Alimentares</label>
+          <div class="checkbox-group">
+            <div class="checkbox-item">
+              <input type="checkbox" id="restrict-vegetarian" value="vegetariano">
+              <label for="restrict-vegetarian">Vegetariano</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="restrict-vegan" value="vegano">
+              <label for="restrict-vegan">Vegano</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="restrict-gluten" value="sem_gluten">
+              <label for="restrict-gluten">Sem Glúten</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="restrict-lactose" value="sem_lactose">
+              <label for="restrict-lactose">Sem Lactose</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="restrict-keto" value="ceto">
+              <label for="restrict-keto">Ceto</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="preferred">Alimentos Preferidos (separados por vírgula)</label>
+          <input type="text" id="preferred" placeholder="Ex: frango, arroz integral, brócolis" value="frango, arroz integral">
+        </div>
+
+        <div class="form-group">
+          <label for="disliked">Alimentos que Não Gosta (separados por vírgula)</label>
+          <input type="text" id="disliked" placeholder="Ex: ovos, leite, alface" value="ovos">
+        </div>
+
+        <div class="button-group">
+          <button class="btn-generate" onclick="generatePlan()">Gerar Plano</button>
+          <button class="btn-clear" onclick="clearForm()">Limpar</button>
+        </div>
+
+        <div class="info-box">
+          <strong>💡 Dica:</strong> Selecione pelo menos um objetivo fitness para melhores resultados.
+        </div>
+      </div>
+
+      <div class="results-section" id="results">
+        <h2>Seu Plano de Dieta</h2>
+
+        <div class="error" id="error"></div>
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <p>Gerando seu plano personalizado...</p>
+        </div>
+
+        <div id="resultContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function getSelectedCheckboxes(prefix) {
+      const checkboxes = document.querySelectorAll(`input[id^="${prefix}"][type="checkbox"]:checked`);
+      return Array.from(checkboxes).map(cb => cb.value);
+    }
+
+    function parseArrayInput(input) {
+      return input
+        .split(',')
+        .map(item => item.trim())
+        .filter(item => item.length > 0);
+    }
+
+    async function generatePlan() {
+      const age = parseInt(document.getElementById('age').value);
+      const weight = parseFloat(document.getElementById('weight').value);
+      const height = parseInt(document.getElementById('height').value);
+      const activity = document.getElementById('activity').value;
+      const goals = getSelectedCheckboxes('goal');
+      const restrictions = getSelectedCheckboxes('restrict');
+      const preferred = parseArrayInput(document.getElementById('preferred').value);
+      const disliked = parseArrayInput(document.getElementById('disliked').value);
+
+      if (goals.length === 0) {
+        showError('Por favor, selecione pelo menos um objetivo fitness.');
+        return;
+      }
+
+      const loading = document.getElementById('loading');
+      const error = document.getElementById('error');
+      const results = document.getElementById('results');
+
+      loading.classList.add('show');
+      error.classList.remove('show');
+      results.classList.add('show');
+
+      try {
+        const response = await fetch('/api/generate-plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            age,
+            weight_kg: weight,
+            height_cm: height,
+            activity_level: activity,
+            fitness_goals: goals,
+            dietary_restrictions: restrictions,
+            preferred_foods: preferred,
+            disliked_foods: disliked
+          })
+        });
+
+        loading.classList.remove('show');
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Erro ao gerar plano');
+        }
+
+        const plan = await response.json();
+        displayResults(plan);
+      } catch (err) {
+        loading.classList.remove('show');
+        showError(err.message);
+      }
+    }
+
+    function displayResults(plan) {
+      const summary = plan.resumo;
+      const avgCalories = (summary.calorias_totais_semana / 7).toFixed(0);
+      const avgProtein = (summary.proteina_total_semana_g / 7).toFixed(0);
+
+      let html = `
+        <div class="summary">
+          <div class="summary-item">
+            <span class="summary-label">Objetivo Calórico Diário:</span>
+            ${plan.plano_nutricional.calorias_diarias_alvo} calorias
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Proteína Mínima Diária:</span>
+            ${plan.plano_nutricional.proteina_minima_diaria_g}g
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Média de Calorias por Dia:</span>
+            ${avgCalories} calorias
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Média de Proteína por Dia:</span>
+            ${avgProtein}g
+          </div>
+        </div>
+      `;
+
+      plan.plano_7_dias.forEach(day => {
+        // Calculate total calories if not provided
+        let totalCalorias = day.calorias_totais_dia || 0;
+        if (totalCalorias === 0) {
+          totalCalorias = day.refeições.reduce((sum, meal) => {
+            return sum + meal.opções.reduce((mealSum, option) => {
+              const nutrientes = option.nutrientes || option;
+              return mealSum + (nutrientes.calorias || 0);
+            }, 0);
+          }, 0);
+        }
+
+        html += `<div class="day-plan">
+          <div class="day-header">Dia ${day.dia} - ${totalCalorias} calorias</div>`;
+
+        day.refeições.forEach(meal => {
+          html += `<div class="meal">
+            <div class="meal-type">📌 ${meal.tipo.toUpperCase()}</div>
+            <div class="meal-options">`;
+
+          meal.opções.forEach(option => {
+            // Handle nested nutrientes object or flat structure
+            const nutrientes = option.nutrientes || option;
+            const calorias = nutrientes.calorias || nutrientes.calories || '—';
+            const proteina = nutrientes.proteina_g || nutrientes.protein_g || nutrientes.proteina || '—';
+            const carbs = nutrientes.carboidratos_g || nutrientes.carbs_g || nutrientes.carboidratos || '—';
+            const gordura = nutrientes.gordura_g || nutrientes.fat_g || nutrientes.gordura || '—';
+
+            html += `<div class="meal-option">
+              <strong>${option.nome || 'Refeição'}</strong>
+              <div class="nutrients">
+                <div class="nutrient">
+                  <div class="nutrient-label">Cal</div>
+                  <div class="nutrient-value">${calorias}</div>
+                </div>
+                <div class="nutrient">
+                  <div class="nutrient-label">Prot</div>
+                  <div class="nutrient-value">${proteina}${proteina !== '—' ? 'g' : ''}</div>
+                </div>
+                <div class="nutrient">
+                  <div class="nutrient-label">Carb</div>
+                  <div class="nutrient-value">${carbs}${carbs !== '—' ? 'g' : ''}</div>
+                </div>
+                <div class="nutrient">
+                  <div class="nutrient-label">Gord</div>
+                  <div class="nutrient-value">${gordura}${gordura !== '—' ? 'g' : ''}</div>
+                </div>
+              </div>
+            </div>`;
+          });
+
+          html += `</div></div>`;
+        });
+
+        html += `</div>`;
+      });
+
+      document.getElementById('resultContent').innerHTML = html;
+    }
+
+    function showError(message) {
+      const error = document.getElementById('error');
+      error.textContent = message;
+      error.classList.add('show');
+    }
+
+    function clearForm() {
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      document.getElementById('age').value = '30';
+      document.getElementById('weight').value = '75';
+      document.getElementById('height').value = '175';
+      document.getElementById('activity').value = 'moderado';
+      document.getElementById('preferred').value = '';
+      document.getElementById('disliked').value = '';
+      document.getElementById('results').classList.remove('show');
+    }
+  </script>
+</body>
+</html>

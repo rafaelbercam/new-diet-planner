@@ -1,0 +1,121 @@
+# Diet Planner Agent - BMAD Briefing
+Projeto: new-diet-planner
+Linguagem: Portuguese
+Data: 2026-10-08
+
+## Objective
+Criar agente que gera planos de dieta personalizados usando Claude API.
+
+## Spec BMAD (JSON)
+{
+  "name": "Diet Planner",
+  "inputs": {
+    "age": "number (18-80)",
+    "weight_kg": "number",
+    "height_cm": "number",
+    "activity_level": "string: sedentário|leve|moderado|intenso|muito_intenso",
+    "fitness_goals": "array: perda_peso|ganho_muscular|manutenção|saúde",
+    "dietary_restrictions": "array: vegetariano|vegano|sem_gluten|sem_lactose|ceto",
+    "preferred_foods": "array of strings",
+    "disliked_foods": "array of strings"
+  },
+  "outputs": {
+    "daily_calorie_target": "number",
+    "meal_plan": [
+      {
+        "day": "number (1-7)",
+        "meals": [
+          {
+            "type": "string: café_manhã|almoço|lanche|jantar",
+            "options": [
+              {
+                "name": "string",
+                "calories": "number",
+                "protein_g": "number",
+                "carbs_g": "number",
+                "fat_g": "number"
+              }
+            ]
+          }
+        ],
+        "total_calories": "number"
+      }
+    ],
+    "week_variety": {
+      "description": "string",
+      "highlights": "array of strings"
+    }
+  },
+  "constraints": [
+    "Total calórico ±5% do target",
+    "Proteína mínima: perda_peso=1.4g/kg, ganho_muscular=2.0g/kg",
+    "Nenhum alimento em disliked_foods",
+    "Respeitar TODAS as dietary_restrictions",
+    "Cada refeição: mínimo 2 opções",
+    "7 dias com variedade de alimentos"
+  ]
+}
+
+## Story Files (Testes)
+
+### Story 1: Perda de Peso
+Input:
+{
+  "age": 32,
+  "weight_kg": 85,
+  "height_cm": 180,
+  "activity_level": "moderado",
+  "fitness_goals": ["perda_peso"],
+  "dietary_restrictions": [],
+  "preferred_foods": ["frango", "arroz integral"],
+  "disliked_foods": ["ovos"]
+}
+
+Expected:
+- daily_calorie_target: ~2200 (±100)
+- 7 days of meal_plan
+- Protein: ~120g (1.4 * 85)
+- No eggs anywhere
+- Min 2 options per meal
+- Total variety across week
+
+### Story 2: Vegetariano Ganho de Massa
+Input:
+{
+  "age": 28,
+  "weight_kg": 65,
+  "height_cm": 165,
+  "activity_level": "intenso",
+  "fitness_goals": ["ganho_muscular"],
+  "dietary_restrictions": ["vegetariano"],
+  "preferred_foods": ["tofu", "legumes"],
+  "disliked_foods": []
+}
+
+Expected:
+- daily_calorie_target: ~2800 (surplus)
+- Protein: ≥130g (2.0 * 65)
+- NO meat/eggs/dairy
+- Min 2 options per meal
+- Focus: tofu, legumes, nuts, seeds
+
+## Stack
+- Runtime: Node.js 18+
+- Language: TypeScript
+- LLM: Claude 3.5 Sonnet
+- Package Manager: npm
+- Testing: Jest
+- Output Directory: _bmad-output/
+
+## Implementation Notes
+1. Criar types.ts baseado no spec JSON acima
+2. Criar agent.ts com Claude API integration
+3. Criar tests baseado nas 2 stories
+4. Usar `claude` command para gerar/refinar
+5. Validate contra constraints antes de return
+
+## Commands to Invoke Skills
+- bmad-build: Implementar agent + tests
+- bmad-review: Revisar código contra spec
+- bmad-validate: Validar spec vs implementation
+- bmad-test: Rodar story files
